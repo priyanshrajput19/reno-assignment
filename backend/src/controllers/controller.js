@@ -20,24 +20,9 @@ export const addSchool = async (req, res) => {
     conn = await initDatabase();
     console.log("Database connection established");
 
-    // Handle image path - different for Vercel vs local
-    const isVercel = process.env.VERCEL === "1";
-    let imageRelativePath = "";
-
-    if (req.file) {
-      if (isVercel) {
-        // For Vercel, we'll store the file as base64 in the database
-        // or use a cloud storage service (for now, we'll skip image storage on Vercel)
-        console.log("Vercel deployment detected - skipping file storage for now");
-        imageRelativePath = ""; // No file storage on Vercel for now
-      } else {
-        // For local development, use the file path
-        imageRelativePath = `schoolImages/${req.file.filename}`;
-      }
-    }
-
+    // Handle image path
+    const imageRelativePath = req.file ? `schoolImages/${req.file.filename}` : "";
     console.log("Image relative path:", imageRelativePath);
-    console.log("Is Vercel deployment:", isVercel);
     console.log(
       "File details:",
       req.file
@@ -46,7 +31,6 @@ export const addSchool = async (req, res) => {
             originalname: req.file.originalname,
             mimetype: req.file.mimetype,
             size: req.file.size,
-            buffer: req.file.buffer ? `Buffer(${req.file.buffer.length} bytes)` : "No buffer",
           }
         : "No file uploaded"
     );

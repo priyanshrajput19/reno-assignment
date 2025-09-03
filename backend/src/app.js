@@ -15,24 +15,16 @@ app.use(cors());
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ limit: "10mb", extended: true }));
 
-// Handle static file serving - different for Vercel vs local
-const isVercel = process.env.VERCEL === "1";
+// Ensure uploads directory exists (public/schoolImages)
+const publicDir = path.join(__dirname, "public");
+const imagesDir = path.join(publicDir, "schoolImages");
 
-if (!isVercel) {
-  // Only serve static files locally (not on Vercel)
-  const publicDir = path.join(__dirname, "public");
-  const imagesDir = path.join(publicDir, "schoolImages");
-
-  if (!fs.existsSync(imagesDir)) {
-    fs.mkdirSync(imagesDir, { recursive: true });
-  }
-
-  // Static serving for images - serve from public directory
-  app.use(express.static(publicDir));
-  console.log("Static file serving enabled for local development");
-} else {
-  console.log("Vercel deployment detected - static file serving disabled");
+if (!fs.existsSync(imagesDir)) {
+  fs.mkdirSync(imagesDir, { recursive: true });
 }
+
+// Static serving for images - serve from public directory
+app.use(express.static(publicDir));
 
 // Health check endpoint
 app.get("/health", (req, res) => {

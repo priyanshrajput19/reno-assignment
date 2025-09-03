@@ -77,7 +77,7 @@ export default function ShowSchoolsPage() {
             <div key={s.id} className="school-card">
               {s.image && (
                 <div className="image-container">
-                  <img src={s.image.startsWith("http") ? s.image : `${import.meta.env.VITE_REACT_BACKEND_BASEURL}/${s.image}`} alt={s.name} />
+                  <img src={s.image.startsWith("data:") ? s.image : `${import.meta.env.VITE_REACT_BACKEND_BASEURL}/${s.image}`} alt={s.name} />
                 </div>
               )}
               <div className="card-content">

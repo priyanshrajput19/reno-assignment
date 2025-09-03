@@ -2,7 +2,6 @@ import path from "path";
 import fs from "fs";
 import { initDatabase } from "../config/database.js";
 import { config } from "../config/config.js";
-import { put } from "@vercel/blob";
 
 export const addSchool = async (req, res) => {
   const { name, address, city, state, contact, email_id } = req.body;
@@ -17,44 +16,32 @@ export const addSchool = async (req, res) => {
 
     // Handle file upload based on environment
     if (req.file) {
-      try {
-        if (config.isVercel) {
-          // Use Vercel Blob for production/Vercel
-          const fileExtension = path.extname(req.file.originalname);
-          const fileName = `school-${Date.now()}-${Math.random().toString(36).substring(2)}${fileExtension}`;
+      if (config.isVercel) {
+        // Use Base64 for production/Vercel
+        const base64String = req.file.buffer.toString("base64");
+        imageUrl = `data:${req.file.mimetype};base64,${base64String}`;
+        console.log("Image stored as Base64 data URL for production");
+      } else {
+        // Use local file storage for development
+        const publicDir = path.join(process.cwd(), "src", "public");
+        const imagesDir = path.join(publicDir, "schoolImages");
 
-          const blob = await put(fileName, req.file.buffer, {
-            access: "public",
-          });
-
-          imageUrl = blob.url;
-          console.log("Image uploaded to Vercel Blob:", imageUrl);
-        } else {
-          // Use local file storage for development
-          const publicDir = path.join(process.cwd(), "src", "public");
-          const imagesDir = path.join(publicDir, "schoolImages");
-
-          // Ensure directory exists
-          if (!fs.existsSync(imagesDir)) {
-            fs.mkdirSync(imagesDir, { recursive: true });
-          }
-
-          // Generate unique filename
-          const fileExtension = path.extname(req.file.originalname);
-          const fileName = `school-${Date.now()}-${Math.random().toString(36).substring(2)}${fileExtension}`;
-          const filePath = path.join(imagesDir, fileName);
-
-          // Save file locally
-          fs.writeFileSync(filePath, req.file.buffer);
-
-          // Create relative path for local development
-          imageUrl = `schoolImages/${fileName}`;
-          console.log("Image saved locally:", imageUrl);
+        // Ensure directory exists
+        if (!fs.existsSync(imagesDir)) {
+          fs.mkdirSync(imagesDir, { recursive: true });
         }
-      } catch (uploadError) {
-        console.error("Error uploading image:", uploadError);
-        // Continue without image if upload fails
-        imageUrl = "";
+
+        // Generate unique filename
+        const fileExtension = path.extname(req.file.originalname);
+        const fileName = `school-${Date.now()}-${Math.random().toString(36).substring(2)}${fileExtension}`;
+        const filePath = path.join(imagesDir, fileName);
+
+        // Save file locally
+        fs.writeFileSync(filePath, req.file.buffer);
+
+        // Create relative path for local development
+        imageUrl = `schoolImages/${fileName}`;
+        console.log("Image saved locally:", imageUrl);
       }
     }
 

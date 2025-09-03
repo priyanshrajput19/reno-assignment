@@ -15,20 +15,46 @@ app.use(cors());
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ limit: "10mb", extended: true }));
 
-// Ensure uploads directory exists (public/schoolImages)
-const publicDir = path.join(__dirname, "public");
-const imagesDir = path.join(publicDir, "schoolImages");
+// Handle static file serving - different for Vercel vs local
+const isVercel = process.env.VERCEL === "1";
 
-if (!fs.existsSync(imagesDir)) {
-  fs.mkdirSync(imagesDir, { recursive: true });
+if (!isVercel) {
+  // Only serve static files locally (not on Vercel)
+  const publicDir = path.join(__dirname, "public");
+  const imagesDir = path.join(publicDir, "schoolImages");
+
+  if (!fs.existsSync(imagesDir)) {
+    fs.mkdirSync(imagesDir, { recursive: true });
+  }
+
+  // Static serving for images - serve from public directory
+  app.use(express.static(publicDir));
+  console.log("Static file serving enabled for local development");
+} else {
+  console.log("Vercel deployment detected - static file serving disabled");
 }
-
-// Static serving for images - serve from public directory
-app.use(express.static(publicDir));
 
 // Health check endpoint
 app.get("/health", (req, res) => {
   res.json({ status: "OK", message: "Server is running" });
+});
+
+// Database health check endpoint
+app.get("/health/db", async (req, res) => {
+  try {
+    const { initDatabase } = await import("./config/database.js");
+    const conn = await initDatabase();
+    await conn.execute("SELECT 1 as test");
+    await conn.end();
+    res.json({ status: "OK", message: "Database connection successful" });
+  } catch (error) {
+    console.error("Database health check failed:", error);
+    res.status(500).json({
+      status: "ERROR",
+      message: "Database connection failed",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
+  }
 });
 
 // Routes

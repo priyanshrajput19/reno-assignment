@@ -2,23 +2,61 @@ import path from "path";
 import { initDatabase } from "../config/database.js";
 
 export const addSchool = async (req, res) => {
+  console.log("=== ADD SCHOOL REQUEST ===");
+  console.log("Request body:", req.body);
+  console.log("Request file:", req.file);
+
   const { name, address, city, state, contact, email_id } = req.body;
+
+  // Validate required fields
   if (!name || !address || !city || !state || !contact || !email_id) {
+    console.log("Missing required fields:", { name, address, city, state, contact, email_id });
     return res.status(400).json({ message: "Missing required fields" });
   }
 
+  let conn;
   try {
-    const conn = await initDatabase();
+    console.log("Initializing database connection...");
+    conn = await initDatabase();
+    console.log("Database connection established");
 
-    // Debug logging
+    // Handle image path - different for Vercel vs local
+    const isVercel = process.env.VERCEL === "1";
+    let imageRelativePath = "";
 
-    const imageRelativePath = req.file ? path.join("schoolImages", req.file.filename) : "";
-    console.log("imageRelativePath:", imageRelativePath);
+    if (req.file) {
+      if (isVercel) {
+        // For Vercel, we'll store the file as base64 in the database
+        // or use a cloud storage service (for now, we'll skip image storage on Vercel)
+        console.log("Vercel deployment detected - skipping file storage for now");
+        imageRelativePath = ""; // No file storage on Vercel for now
+      } else {
+        // For local development, use the file path
+        imageRelativePath = `schoolImages/${req.file.filename}`;
+      }
+    }
+
+    console.log("Image relative path:", imageRelativePath);
+    console.log("Is Vercel deployment:", isVercel);
+    console.log(
+      "File details:",
+      req.file
+        ? {
+            filename: req.file.filename,
+            originalname: req.file.originalname,
+            mimetype: req.file.mimetype,
+            size: req.file.size,
+            buffer: req.file.buffer ? `Buffer(${req.file.buffer.length} bytes)` : "No buffer",
+          }
+        : "No file uploaded"
+    );
 
     const values = [name, address, city, state, contact, imageRelativePath, email_id];
-    console.log("values array:", values);
+    console.log("Values array for insert:", values);
 
+    console.log("Executing INSERT query...");
     const [result] = await conn.execute("INSERT INTO schools (name, address, city, state, contact, image, email_id) VALUES (?, ?, ?, ?, ?, ?, ?)", values);
+    console.log("Insert result:", result);
 
     const newSchool = {
       id: result.insertId,
@@ -31,11 +69,35 @@ export const addSchool = async (req, res) => {
       email_id,
     };
 
-    await conn.end();
+    console.log("School created successfully:", newSchool);
     res.status(200).json(newSchool);
   } catch (error) {
-    console.error("Error adding school:", error);
-    res.status(500).json({ message: "Failed to add school" });
+    console.error("=== ERROR ADDING SCHOOL ===");
+    console.error("Error type:", error.constructor.name);
+    console.error("Error message:", error.message);
+    console.error("Error code:", error.code);
+    console.error("Error stack:", error.stack);
+
+    // Return more detailed error in development
+    const errorMessage = process.env.NODE_ENV === "development" ? `Failed to add school: ${error.message}` : "Failed to add school";
+
+    res.status(500).json({
+      message: errorMessage,
+      ...(process.env.NODE_ENV === "development" && {
+        error: error.message,
+        code: error.code,
+      }),
+    });
+  } finally {
+    // Ensure connection is closed
+    if (conn) {
+      try {
+        await conn.end();
+        console.log("Database connection closed");
+      } catch (closeError) {
+        console.error("Error closing database connection:", closeError);
+      }
+    }
   }
 };
 

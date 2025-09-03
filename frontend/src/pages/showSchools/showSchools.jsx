@@ -13,7 +13,7 @@ export default function ShowSchoolsPage() {
 
   const fetchSchools = async () => {
     try {
-      const response = await axios.get("http://localhost:4000/getSchools");
+      const response = await axios.get(`${import.meta.env.VITE_REACT_BACKEND_BASEURL}/getSchools`);
       setSchools(response.data);
     } catch (e) {
       console.error("Error fetching schools:", e);
@@ -53,7 +53,7 @@ export default function ShowSchoolsPage() {
             <div key={s.id} className="school-card">
               {s.image && (
                 <div className="image-container">
-                  <img src={`http://localhost:4000/${s.image}`} alt={s.name} />
+                  <img src={`${import.meta.env.VITE_REACT_BACKEND_BASEURL}/${s.image}`} alt={s.name} />
                 </div>
               )}
               <div className="card-content">

@@ -41,7 +41,7 @@ export default function AddSchoolPage() {
         formData.append("image", data.image[0]);
       }
 
-      await axios.post("http://localhost:4000/addSchool", formData, { headers: { "Content-Type": "multipart/form-data" } });
+      await axios.post(`${import.meta.env.VITE_REACT_BACKEND_BASEURL}/addSchool`, formData, { headers: { "Content-Type": "multipart/form-data" } });
       reset();
       setPreviewUrl("");
       navigate("/schools");

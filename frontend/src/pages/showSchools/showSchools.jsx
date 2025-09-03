@@ -77,7 +77,14 @@ export default function ShowSchoolsPage() {
             <div key={s.id} className="school-card">
               {s.image && (
                 <div className="image-container">
-                  <img src={s.image.startsWith("data:") ? s.image : `${import.meta.env.VITE_REACT_BACKEND_BASEURL}/${s.image}`} alt={s.name} />
+                  <img
+                    src={s.image.startsWith("data:") ? s.image : `${import.meta.env.VITE_REACT_BACKEND_BASEURL}/schoolImages/${s.image}`}
+                    alt={s.name}
+                    onError={(e) => {
+                      console.error("Image failed to load:", s.image);
+                      e.target.style.display = "none";
+                    }}
+                  />
                 </div>
               )}
               <div className="card-content">

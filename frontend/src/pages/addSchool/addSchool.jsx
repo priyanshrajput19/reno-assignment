@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import PageHeader from "../../components/pageHeader/PageHeader";
 import "./addSchool.css";
 
 export default function AddSchoolPage() {
@@ -46,18 +47,12 @@ export default function AddSchoolPage() {
       navigate("/schools");
     } catch (err) {
       console.log(err);
-      alert("Failed to save school. Ensure backend is running.");
     }
   };
 
   return (
     <div className="add-school-container">
-      <div className="header">
-        <h1>Add School</h1>
-        <button className="back-btn" onClick={() => navigate("/")}>
-          Back to Schools
-        </button>
-      </div>
+      <PageHeader title="Add School" buttonText="← Back to Schools" onButtonClick={() => navigate("/")} buttonClassName="back-btn" />
 
       <form className="add-school-form" onSubmit={handleSubmit(submitForm)} noValidate>
         <div className="form-grid">

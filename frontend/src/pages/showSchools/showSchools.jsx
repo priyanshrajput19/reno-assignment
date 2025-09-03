@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import PageHeader from "../../components/pageHeader/PageHeader";
 import "./showSchools.css";
+
+import SchoolStackIcon from "../../assets/icons/school-stack.svg";
+import PlusIcon from "../../assets/icons/plus.svg";
 
 export default function ShowSchoolsPage() {
   const [schools, setSchools] = useState([]);
@@ -21,16 +25,25 @@ export default function ShowSchoolsPage() {
 
   return (
     <div className="show-schools-container">
-      <div className="header">
-        <h1>Schools</h1>
-        <button className="add-school-btn" onClick={() => navigate("/add")}>
-          Add School
-        </button>
-      </div>
+      <PageHeader title="Schools" buttonText="+ Add School" onButtonClick={() => navigate("/add")} buttonClassName="action-btn" />
 
       {schools.length === 0 ? (
         <div className="no-schools">
-          <p>No schools exist</p>
+          <div className="empty-state">
+            <div className="empty-icon">
+              <img src={SchoolStackIcon} alt="School Stack" />
+            </div>
+            <h2 className="empty-title">No Schools Found</h2>
+            <p className="empty-description">
+              It looks like you haven't added any schools yet.
+              <br />
+              Get started by adding your first school to the system.
+            </p>
+            <button className="empty-action-btn" onClick={() => navigate("/add")}>
+              <img src={PlusIcon} alt="Plus" />
+              Add Your First School
+            </button>
+          </div>
         </div>
       ) : (
         <div className="schools-grid">

@@ -6,39 +6,11 @@
   padding: 20px;
 }
 
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 30px;
-  padding: 0 20px;
-}
-
-.header h1 {
-  font-size: 2.5rem;
-  font-weight: bold;
-  color: #f9fafb;
-  margin: 0;
-}
-
-.back-btn {
-  background-color: #6b7280;
-  color: white;
-  border: none;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.2s;
-}
-
-.back-btn:hover {
-  background-color: #4b5563;
-}
+/* Header styles moved to PageHeader component */
 
 .add-school-form {
   max-width: 800px;
-  margin: 0 auto;
+  margin: 40px auto 0;
   background-color: #374151;
   padding: 30px;
   border-radius: 12px;
@@ -159,17 +131,6 @@
     padding: 15px;
   }
 
-  .header {
-    flex-direction: column;
-    gap: 16px;
-    text-align: center;
-    padding: 0 10px;
-  }
-
-  .header h1 {
-    font-size: 2rem;
-  }
-
   .add-school-form {
     padding: 20px;
     margin: 0 10px;
@@ -197,14 +158,6 @@
 @media (max-width: 480px) {
   .add-school-container {
     padding: 10px;
-  }
-
-  .header {
-    padding: 0 5px;
-  }
-
-  .header h1 {
-    font-size: 1.75rem;
   }
 
   .add-school-form {

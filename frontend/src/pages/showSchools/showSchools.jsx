@@ -78,10 +78,15 @@ export default function ShowSchoolsPage() {
               {s.image && (
                 <div className="image-container">
                   <img
-                    src={s.image.startsWith("data:") ? s.image : `${import.meta.env.VITE_REACT_BACKEND_BASEURL}/schoolImages/${s.image}`}
+                    src={s.image.startsWith("data:") ? s.image : `${import.meta.env.VITE_REACT_BACKEND_BASEURL}/${s.image}`}
                     alt={s.name}
+                    onLoad={() => {
+                      console.log("Image loaded successfully:", s.image);
+                    }}
                     onError={(e) => {
                       console.error("Image failed to load:", s.image);
+                      console.error("Image type:", s.image.startsWith("data:") ? "Base64" : "File path");
+                      console.error("Constructed URL:", s.image.startsWith("data:") ? s.image : `${import.meta.env.VITE_REACT_BACKEND_BASEURL}/${s.image}`);
                       e.target.style.display = "none";
                     }}
                   />

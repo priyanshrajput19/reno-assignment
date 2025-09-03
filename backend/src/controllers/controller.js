@@ -19,8 +19,18 @@ export const addSchool = async (req, res) => {
       if (config.isVercel) {
         // Use Base64 for production/Vercel
         const base64String = req.file.buffer.toString("base64");
-        imageUrl = `data:${req.file.mimetype};base64,${base64String}`;
+
+        // Normalize MIME type to ensure JPEG/JPG files work correctly
+        let mimeType = req.file.mimetype;
+        if (mimeType === "image/jpg" || mimeType === "image/jpeg") {
+          mimeType = "image/jpeg";
+        }
+
+        imageUrl = `data:${mimeType};base64,${base64String}`;
         console.log("Image stored as Base64 data URL for production");
+        console.log("Original MIME type:", req.file.mimetype);
+        console.log("Normalized MIME type:", mimeType);
+        console.log("File extension:", path.extname(req.file.originalname));
       } else {
         // Use local file storage for development
         const publicDir = path.join(process.cwd(), "src", "public");

@@ -15,6 +15,7 @@ export default function AddSchoolPage() {
   } = useForm();
 
   const [previewUrl, setPreviewUrl] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const onImageChange = (event) => {
     const file = event.target.files?.[0];
@@ -22,6 +23,23 @@ export default function AddSchoolPage() {
       setPreviewUrl("");
       return;
     }
+
+    // Check if file is PNG
+    if (file.type !== "image/png") {
+      alert("Only PNG images are allowed. Please select a PNG file.");
+      event.target.value = "";
+      setPreviewUrl("");
+      return;
+    }
+
+    // Check file size (10MB limit)
+    if (file.size > 10 * 1024 * 1024) {
+      alert("File size must be less than 10MB. Please select a smaller file.");
+      event.target.value = "";
+      setPreviewUrl("");
+      return;
+    }
+
     const reader = new FileReader();
     reader.onload = () => setPreviewUrl(reader.result?.toString() || "");
     reader.readAsDataURL(file);
@@ -29,6 +47,7 @@ export default function AddSchoolPage() {
 
   const submitForm = async (data) => {
     console.log(data);
+    setIsSubmitting(true);
     try {
       const formData = new FormData();
       formData.append("name", data.name);
@@ -47,6 +66,8 @@ export default function AddSchoolPage() {
       navigate("/schools");
     } catch (err) {
       console.log(err);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -131,7 +152,8 @@ export default function AddSchoolPage() {
 
           <div className="form-field">
             <label htmlFor="image">School Image</label>
-            <input id="image" type="file" accept="image/jpeg, image/png, image/jpg" {...register("image")} onChange={onImageChange} />
+            <input id="image" type="file" accept="image/png" {...register("image")} onChange={onImageChange} />
+            <small className="file-info">Only PNG images allowed (Max 10MB)</small>
           </div>
         </div>
 
@@ -142,8 +164,8 @@ export default function AddSchoolPage() {
         )}
 
         <div className="form-actions">
-          <button type="submit" className="submit-btn">
-            Save School
+          <button type="submit" className="submit-btn" disabled={isSubmitting}>
+            {isSubmitting ? "Saving..." : "Save School"}
           </button>
           <button
             type="button"

@@ -25,19 +25,33 @@ if (!fs.existsSync(imagesDir)) {
 // Static serving for images - serve from public directory
 app.use(express.static(publicDir));
 
+// Health check endpoint
+app.get("/health", (req, res) => {
+  res.json({ status: "OK", message: "Server is running" });
+});
+
 // Routes
 app.use("/", routes);
 
+// Initialize database and start server
 const startServer = async () => {
   try {
     await initDatabase();
-    app.listen(config.port, () => {
-      console.log(`Server is running on http://localhost:${config.port}`);
-    });
+    console.log("Database initialized successfully");
+
+    // Start server only in development (not on Vercel)
+    if (process.env.NODE_ENV !== "production") {
+      app.listen(config.port, () => {
+        console.log(`Server is running on http://localhost:${config.port}`);
+      });
+    }
   } catch (error) {
-    console.error("Failed to start server:", error);
-    process.exit(1);
+    console.error("Failed to initialize database:", error);
   }
 };
 
+// Start database initialization
 startServer();
+
+// Export app for Vercel
+export default app;

@@ -11,8 +11,6 @@ export const addSchool = async (req, res) => {
     const conn = await initDatabase();
 
     // Debug logging
-    console.log("req.file:", req.file);
-    console.log("req.body:", req.body);
 
     const imageRelativePath = req.file ? path.join("schoolImages", req.file.filename) : "";
     console.log("imageRelativePath:", imageRelativePath);

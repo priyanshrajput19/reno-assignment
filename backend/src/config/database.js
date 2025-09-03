@@ -9,7 +9,6 @@ const __dirname = path.dirname(__filename);
 
 export const initDatabase = async () => {
   const { host, user, password, database } = config.db;
-  console.log(config.db);
 
   // 1) Connect without DB
   const connect = await mysql.createConnection({ host, user, password });

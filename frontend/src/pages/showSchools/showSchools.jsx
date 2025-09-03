@@ -11,16 +11,18 @@ export default function ShowSchoolsPage() {
   const [schools, setSchools] = useState([]);
   const navigate = useNavigate();
 
+  const fetchSchools = async () => {
+    try {
+      const response = await axios.get("http://localhost:4000/getSchools");
+      setSchools(response.data);
+    } catch (e) {
+      console.error("Error fetching schools:", e);
+      setSchools([]);
+    }
+  };
+
   useEffect(() => {
-    const load = async () => {
-      try {
-        const { data } = await axios.get("http://localhost:4000/getSchools");
-        setSchools(data);
-      } catch (e) {
-        setSchools([]);
-      }
-    };
-    load();
+    fetchSchools();
   }, []);
 
   return (

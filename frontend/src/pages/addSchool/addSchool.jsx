@@ -32,9 +32,9 @@ export default function AddSchoolPage() {
       return;
     }
 
-    // Check file size (10MB limit)
-    if (file.size > 10 * 1024 * 1024) {
-      alert("File size must be less than 10MB. Please select a smaller file.");
+    // Check file size (5MB limit)
+    if (file.size > 5 * 1024 * 1024) {
+      alert("File size must be less than 5MB. Please select a smaller file.");
       event.target.value = "";
       setPreviewUrl("");
       return;
@@ -153,7 +153,7 @@ export default function AddSchoolPage() {
           <div className="form-field">
             <label htmlFor="image">School Image</label>
             <input id="image" type="file" accept="image/png" {...register("image")} onChange={onImageChange} />
-            <small className="file-info">Only PNG images allowed (Max 10MB)</small>
+            <small className="file-info">Only PNG images allowed (Max 5MB)</small>
           </div>
         </div>
 

@@ -43,7 +43,6 @@ export const getSchools = async (req, res) => {
   try {
     const conn = await initDatabase();
     const [rows] = await conn.execute("SELECT * FROM schools ORDER BY created_at DESC");
-    console.log("Retrieved schools:", rows);
     await conn.end();
     res.json(rows);
   } catch (error) {

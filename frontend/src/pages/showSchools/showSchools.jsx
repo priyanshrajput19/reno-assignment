@@ -9,15 +9,19 @@ import PlusIcon from "../../assets/icons/plus.svg";
 
 export default function ShowSchoolsPage() {
   const [schools, setSchools] = useState([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   const fetchSchools = async () => {
     try {
+      setLoading(true);
       const response = await axios.get(`${import.meta.env.VITE_REACT_BACKEND_BASEURL}/getSchools`);
       setSchools(response.data);
     } catch (e) {
       console.error("Error fetching schools:", e);
       setSchools([]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -25,11 +29,31 @@ export default function ShowSchoolsPage() {
     fetchSchools();
   }, []);
 
+  // Skeleton component for loading state
+  const SkeletonCard = () => (
+    <div className="school-card skeleton-card">
+      <div className="image-container skeleton-image">
+        <div className="skeleton-shimmer"></div>
+      </div>
+      <div className="card-content">
+        <div className="skeleton-title skeleton-shimmer"></div>
+        <div className="skeleton-text skeleton-shimmer"></div>
+        <div className="skeleton-text skeleton-shimmer"></div>
+      </div>
+    </div>
+  );
+
   return (
     <div className="show-schools-container">
-      <PageHeader title="Schools" buttonText="+ Add School" onButtonClick={() => navigate("/add")} buttonClassName="action-btn" />
+      <PageHeader title="Schools" buttonText="+ Add School" onButtonClick={() => navigate("/add")} buttonClassName="action-btn" loading={loading} />
 
-      {schools.length === 0 ? (
+      {loading ? (
+        <div className="schools-grid">
+          {Array.from({ length: 8 }).map((_, index) => (
+            <SkeletonCard key={index} />
+          ))}
+        </div>
+      ) : schools.length === 0 ? (
         <div className="no-schools">
           <div className="empty-state">
             <div className="empty-icon">

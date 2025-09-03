@@ -1,5 +1,8 @@
 import path from "path";
+import fs from "fs";
 import { initDatabase } from "../config/database.js";
+import { config } from "../config/config.js";
+import { put } from "@vercel/blob";
 
 export const addSchool = async (req, res) => {
   const { name, address, city, state, contact, email_id } = req.body;
@@ -10,12 +13,52 @@ export const addSchool = async (req, res) => {
   try {
     const conn = await initDatabase();
 
-    // Debug logging
+    let imageUrl = "";
 
-    const imageRelativePath = req.file ? path.join("schoolImages", req.file.filename) : "";
-    console.log("imageRelativePath:", imageRelativePath);
+    // Handle file upload based on environment
+    if (req.file) {
+      try {
+        if (config.isVercel) {
+          // Use Vercel Blob for production/Vercel
+          const fileExtension = path.extname(req.file.originalname);
+          const fileName = `school-${Date.now()}-${Math.random().toString(36).substring(2)}${fileExtension}`;
 
-    const values = [name, address, city, state, contact, imageRelativePath, email_id];
+          const blob = await put(fileName, req.file.buffer, {
+            access: "public",
+          });
+
+          imageUrl = blob.url;
+          console.log("Image uploaded to Vercel Blob:", imageUrl);
+        } else {
+          // Use local file storage for development
+          const publicDir = path.join(process.cwd(), "src", "public");
+          const imagesDir = path.join(publicDir, "schoolImages");
+
+          // Ensure directory exists
+          if (!fs.existsSync(imagesDir)) {
+            fs.mkdirSync(imagesDir, { recursive: true });
+          }
+
+          // Generate unique filename
+          const fileExtension = path.extname(req.file.originalname);
+          const fileName = `school-${Date.now()}-${Math.random().toString(36).substring(2)}${fileExtension}`;
+          const filePath = path.join(imagesDir, fileName);
+
+          // Save file locally
+          fs.writeFileSync(filePath, req.file.buffer);
+
+          // Create relative path for local development
+          imageUrl = `schoolImages/${fileName}`;
+          console.log("Image saved locally:", imageUrl);
+        }
+      } catch (uploadError) {
+        console.error("Error uploading image:", uploadError);
+        // Continue without image if upload fails
+        imageUrl = "";
+      }
+    }
+
+    const values = [name, address, city, state, contact, imageUrl, email_id];
     console.log("values array:", values);
 
     const [result] = await conn.execute("INSERT INTO schools (name, address, city, state, contact, image, email_id) VALUES (?, ?, ?, ?, ?, ?, ?)", values);
@@ -27,7 +70,7 @@ export const addSchool = async (req, res) => {
       city,
       state,
       contact,
-      image: imageRelativePath,
+      image: imageUrl,
       email_id,
     };
 
@@ -35,7 +78,7 @@ export const addSchool = async (req, res) => {
     res.status(200).json(newSchool);
   } catch (error) {
     console.error("Error adding school:", error);
-    res.status(500).json({ message: "Failed to add school" });
+    res.status(500).json({ message: "Failed to add school", error: error.message });
   }
 };
 

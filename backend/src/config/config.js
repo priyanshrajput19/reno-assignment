@@ -9,4 +9,6 @@ export const config = {
     password: process.env.DB_PASSWORD, // Default password is empty
     database: process.env.DB_NAME, // Default database is empty
   },
+  isProduction: process.env.NODE_ENV === "production",
+  isVercel: process.env.VERCEL === "1",
 };

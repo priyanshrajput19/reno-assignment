@@ -15,35 +15,13 @@ export default function AddSchoolPage() {
   } = useForm();
 
   const [previewUrl, setPreviewUrl] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState("");
 
   const onImageChange = (event) => {
     const file = event.target.files?.[0];
     if (!file) {
       setPreviewUrl("");
-      setError("");
       return;
     }
-
-    // Check file size (5MB limit)
-    if (file.size > 5 * 1024 * 1024) {
-      setError("File size must be less than 5MB");
-      setPreviewUrl("");
-      event.target.value = ""; // Clear the input
-      return;
-    }
-
-    // Check file type
-    const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/gif", "image/webp"];
-    if (!allowedTypes.includes(file.type)) {
-      setError("Only JPEG, PNG, GIF, and WebP images are allowed");
-      setPreviewUrl("");
-      event.target.value = ""; // Clear the input
-      return;
-    }
-
-    setError("");
     const reader = new FileReader();
     reader.onload = () => setPreviewUrl(reader.result?.toString() || "");
     reader.readAsDataURL(file);
@@ -51,9 +29,6 @@ export default function AddSchoolPage() {
 
   const submitForm = async (data) => {
     console.log(data);
-    setIsSubmitting(true);
-    setError("");
-
     try {
       const formData = new FormData();
       formData.append("name", data.name);
@@ -66,34 +41,18 @@ export default function AddSchoolPage() {
         formData.append("image", data.image[0]);
       }
 
-      await axios.post(`${import.meta.env.VITE_REACT_BACKEND_BASEURL}/addSchool`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-        timeout: 30000, // 30 second timeout
-      });
+      await axios.post(`${import.meta.env.VITE_REACT_BACKEND_BASEURL}/addSchool`, formData, { headers: { "Content-Type": "multipart/form-data" } });
       reset();
       setPreviewUrl("");
       navigate("/schools");
     } catch (err) {
       console.log(err);
-      if (err.response?.status === 413) {
-        setError("File too large. Please choose an image smaller than 5MB.");
-      } else if (err.response?.data?.message) {
-        setError(err.response.data.message);
-      } else if (err.code === "ECONNABORTED") {
-        setError("Request timeout. Please try again.");
-      } else {
-        setError("Failed to add school. Please try again.");
-      }
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
   return (
     <div className="add-school-container">
       <PageHeader title="Add School" buttonText="← Back to Schools" onButtonClick={() => navigate("/")} buttonClassName="back-btn" />
-
-      {error && <div className="error-message">{error}</div>}
 
       <form className="add-school-form" onSubmit={handleSubmit(submitForm)} noValidate>
         <div className="form-grid">
@@ -183,8 +142,8 @@ export default function AddSchoolPage() {
         )}
 
         <div className="form-actions">
-          <button type="submit" className="submit-btn" disabled={isSubmitting}>
-            {isSubmitting ? "Saving..." : "Save School"}
+          <button type="submit" className="submit-btn">
+            Save School
           </button>
           <button
             type="button"
@@ -192,9 +151,7 @@ export default function AddSchoolPage() {
             onClick={() => {
               reset();
               setPreviewUrl("");
-              setError("");
             }}
-            disabled={isSubmitting}
           >
             Reset
           </button>
